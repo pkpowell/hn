@@ -54,10 +54,10 @@ func flags() {
 }
 
 func show() {
-	fmt.Printf("hostname: %s\n", do("hostname", nil))
-	fmt.Printf("scutil LocalHostName: %s\n", do("scutil", []string{"--get", "LocalHostName"}))
-	fmt.Printf("scutil HostName: %s\n", do("scutil", []string{"--get", "HostName"}))
-	fmt.Printf("scutil ComputerName: %s\n", do("scutil", []string{"--get", "ComputerName"}))
+	fmt.Printf("hostname: %s", do("hostname", nil))
+	fmt.Printf("LocalHostName: %s", do("scutil", []string{"--get", "LocalHostName"}))
+	fmt.Printf("HostName: %s", do("scutil", []string{"--get", "HostName"}))
+	fmt.Printf("ComputerName: %s", do("scutil", []string{"--get", "ComputerName"}))
 }
 
 func do(command string, arg []string) string {
@@ -72,18 +72,9 @@ func do(command string, arg []string) string {
 
 	err = cmd.Run()
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println(stderr.String())
-		if stderr.String() != "HostName: not set" {
-			// fmt.Printf("Error occured. %s not set?\n\n", arg)
-			fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-			// fmt.Printf("cmd.Output %s, %s\n\n", arg, err.Error())
-
-			return ""
-		}
+		return stderr.String()
 	}
 
-	// fmt.Printf("command output %s", string(out))
 	return out.String()
 }
 
