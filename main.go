@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -53,27 +54,37 @@ func flags() {
 }
 
 func show() {
-	fmt.Printf("hostname: %s", do("hostname", nil))
-	fmt.Printf("scutil LocalHostName: %s", do("scutil", []string{"--get", "LocalHostName"}))
-	fmt.Printf("scutil HostName: %s", do("scutil", []string{"--get", "HostName"}))
-	fmt.Printf("scutil ComputerName: %s", do("scutil", []string{"--get", "ComputerName"}))
+	fmt.Printf("hostname: %s\n", do("hostname", nil))
+	fmt.Printf("scutil LocalHostName: %s\n", do("scutil", []string{"--get", "LocalHostName"}))
+	fmt.Printf("scutil HostName: %s\n", do("scutil", []string{"--get", "HostName"}))
+	fmt.Printf("scutil ComputerName: %s\n", do("scutil", []string{"--get", "ComputerName"}))
 }
 
 func do(command string, arg []string) string {
-	var cmd *exec.Cmd
-	var out []byte
 	var err error
+	var cmd *exec.Cmd
+	var out bytes.Buffer
+	var stderr bytes.Buffer
 
 	cmd = exec.Command(command, arg...)
-	out, err = cmd.CombinedOutput()
-	if err != nil {
-		fmt.Printf("cmd.CombinedOutput %s, %s", arg, err.Error())
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
 
-		return ""
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println(stderr.String())
+		if stderr.String() != "HostName: not set" {
+			// fmt.Printf("Error occured. %s not set?\n\n", arg)
+			fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+			// fmt.Printf("cmd.Output %s, %s\n\n", arg, err.Error())
+
+			return ""
+		}
 	}
 
 	// fmt.Printf("command output %s", string(out))
-	return string(out)
+	return out.String()
 }
 
 func checkAdmin() {
