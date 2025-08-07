@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	hostname *string
+	hostname string
 	Version  string
 	version  *bool
 	// show     *bool
@@ -19,38 +19,54 @@ var (
 )
 
 func main() {
-	flags()
+	args := flags()
 	fmt.Printf("hn version %s\n\n", Version)
 	if *version {
 		os.Exit(0)
 	}
 
-	if *hostname == "" {
+	// fmt.Printf("args %s\n", args)
+	if len(args) < 1 {
 		fmt.Println("Current values")
 		show()
-		os.Exit(0)
+
+		os.Exit(1)
 	}
+
+	hostname = args[0]
+
+	// if hostname == "" {
+	// 	fmt.Println("Current values")
+	// 	show()
+	// 	os.Exit(0)
+	// }
 
 	checkAdmin()
 
-	if len(*hostname) > 1 {
-		do("hostname", []string{*hostname})
-		do("scutil", []string{"--set", "LocalHostName", *hostname})
-		do("scutil", []string{"--set", "HostName", *hostname})
-		do("scutil", []string{"--set", "ComputerName", *hostname})
+	if len(hostname) > 1 {
+		do("hostname", []string{hostname})
+		do("scutil", []string{"--set", "LocalHostName", hostname})
+		do("scutil", []string{"--set", "HostName", hostname})
+		do("scutil", []string{"--set", "ComputerName", hostname})
 		fmt.Println("Set new hostname")
 		show()
 	}
 }
 
-func flags() {
+func flags() []string {
 
 	version = pflag.BoolP("version", "v", false, "show version")
 	// show = pflag.BoolP("show", "s", false, "show current values")
-	hostname = pflag.StringP("hostname", "n", "", "set hostname")
+	// hostname = pflag.StringP("hostname", "n", "", "set hostname")
 	help = pflag.BoolP("help", "h", false, "show help")
 
 	pflag.Parse()
+	if *help {
+		pflag.Usage()
+		os.Exit(0)
+	}
+
+	return pflag.Args()
 }
 
 func show() {
